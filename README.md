@@ -1000,7 +1000,7 @@ Found an issue, or notice something is off? Contributions are welcome — this i
 
 ## License
 
-This cheat sheet is provided under the MIT License.
+MIT License — Free to use and modify.
 
 ---
 
@@ -1008,6 +1008,8 @@ This cheat sheet is provided under the MIT License.
 **Based on**: OpenCode CLI (npm: opencode-ai, v1.18.3)
 
 *This is a Beta reference. Commands and examples are verified against `opencode --help` and the official docs, but OpenCode evolves quickly — flag anything that drifts.*
+
+*Last synced: 2026-07-19 via [workspace manager](https://github.com/BA-CalderonMorales)*
 
 ---
 *Last synced: 2026-07-19 via [workspace manager](https://github.com/BA-CalderonMorales)*
