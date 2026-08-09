@@ -1,45 +1,67 @@
 # AGENTS.md - OpenCode Cheat Sheet
 
-## Quick Reference
+## Current Shape
 
-- **Purpose**: Quick reference guide for OpenCode CLI
-- **Official Docs**: https://opencode.ai/docs
-- **Verify**: `opencode --help` before documenting
+- The product is the README single page: progressive levels (Level 1 ->
+  Level 5), quick-reference tables, `<details>` sections, and command
+  lookups aligned against the live OpenCode CLI.
+- `skills/<name>/` holds on-disk reusable capabilities as `SKILL.md` files
+  (mcp-setup, plan-mode, session-management).
+- `assets/` holds the sheet imagery; `.github/workflows/security-scan.yml`
+  is the CI gate (shared org-level scan, Trivy by default).
+- Community surface: `CLAUDE.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
+  `LICENSE`.
+- The sheet is Beta: commands and examples are still being aligned against
+  the live CLI and docs; uncertainty is called out, never guessed.
+- Pre-rewrite leftovers are pruned; use Git history for legacy reference.
 
-## Key Principles
+## Key Sections
 
-1. **Accuracy First** - Verify all commands against official OpenCode docs and `opencode --help`
-2. **Think Critically** - Help users understand WHEN, not just HOW
-3. **Stay Current** - OpenCode (this sheet is Beta) updates frequently
-4. **No Hype** - Focus on practical utility
+| To understand... | Read |
+|---|---|
+| The sheet: levels, commands, examples | `README.md` |
+| On-disk skills and how to invoke them | `skills/` |
+| Contribution flow and standards | `CONTRIBUTING.md` |
+| Official OpenCode truth | [opencode.ai/docs](https://opencode.ai/docs) |
+| Security gate behavior | `.github/workflows/security-scan.yml` |
 
-## Structure
+Lost in the woods? Start with `README.md` for *what the sheet covers*, then
+`CONTRIBUTING.md` for *how changes land*.
 
-- **Level 1-5**: Progressive learning path
-- **Skills**: Reusable on-disk capabilities (SKILL.md)
-- **Command Reference**: Quick lookup tables
-- **Best Practices**: Guidelines for effective use
+## Branch Strategy
 
-## When Making Changes
+- `develop` is the default base for PRs and the integration branch.
+- Every change traces: topic branch off `develop`, merge into `develop`,
+  then merge `develop` into `main`.
+- Never open a PR directly from a topic branch to `main`. This keeps
+  `develop` as the integration branch and makes contribution easy to follow.
 
-- Verify commands with `opencode --help` or the live docs at https://opencode.ai/docs
-- Maintain consistent formatting with collapsible `<details>` sections
-- Update "Last updated" date in README
-- This is a Beta sheet — call out uncertainty rather than guessing
+## CI
 
-## Target Audience
+- Security scan runs on pushes and PRs against `main` and `develop`
+  (org-level reusable workflow); gate failures block merges.
 
-Developers who:
-- Want to leverage AI assistance effectively
-- Value understanding over memorization
-- Need practical patterns for real work
+## Rules
 
-## Working Rules
+- Accuracy first: verify commands with `opencode --help` and the live docs
+  at opencode.ai/docs before documenting; this sheet is Beta, so call out
+  uncertainty rather than guessing.
+- Maintain consistent formatting with collapsible `<details>` sections;
+  minimal emojis, used for structure, not decoration.
+- Update the "Last updated" date in the README with each change batch.
+- One change per commit; stop and explain before major restructuring; do not
+  bundle unrelated work into the same commit.
 
-- Stop and explain before major architectural changes
-- One change per commit, commit before starting next
-- Do not bundle unrelated work into the same commit
-- **Branch flow (canonical):** All changes go through `develop`. Branch a topic branch off `develop`, make the change, merge the topic branch into `develop`, then merge `develop` into `main`. Never open a PR directly from a topic branch to `main`. This keeps `develop` as the integration branch and makes contribution easy to demonstrate and follow.
+## Design Principles
+
+- **POLA** - behavior must not astonish: verified flags, current commands,
+  no invented workflows; Beta gaps are labeled as such.
+- **DRY** - the README is the single source of truth; for depth, link to
+  official docs instead of restating them.
+- **KISS** - a scannable reference beats exhaustive prose; when in doubt,
+  delete a section before adding one.
+- **DIP** - depend on the official documentation contract, never on
+  hearsay; this sheet is a guide to sources, not a replacement for them.
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
