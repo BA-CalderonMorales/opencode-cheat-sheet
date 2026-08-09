@@ -846,7 +846,7 @@ auth status and tests the OAuth discovery flow. See
 opencode upgrade
 
 # Upgrade to a specific version
-opencode upgrade v0.1.48
+opencode upgrade v1.18.3
 
 # Disable autoupdate checks
 export OPENCODE_DISABLE_AUTOUPDATE=1
@@ -1004,11 +1004,11 @@ MIT License — Free to use and modify.
 
 ---
 
-**Last updated: July 2026**
+**Last updated: August 2026**
 **Based on**: OpenCode CLI (npm: opencode-ai, v1.18.3)
 
 *This is a Beta reference. Commands and examples are verified against `opencode --help` and the official docs, but OpenCode evolves quickly — flag anything that drifts.*
 
-*Last synced: 2026-07-19 via [workspace manager](https://github.com/BA-CalderonMorales)*
+*Last synced: 2026-08-09 via [workspace manager](https://github.com/BA-CalderonMorales)*
 
 ---
