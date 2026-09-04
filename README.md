@@ -658,6 +658,22 @@ opencode run -f src/app.ts "review this file"
 # Output raw JSON events (for automation)
 opencode run --format json "list the exported functions in main.go"
 
+# Run a CLI command non-interactively (message is used for args)
+opencode run --command "git log" "summarize recent commits"
+
+# Show thinking blocks / set a model variant (reasoning effort)
+opencode run --thinking "debug this stack trace"
+opencode run --variant high "optimize this query"
+
+# Run in direct interactive split-footer mode
+opencode run -i "walk through the refactor"
+
+# Run in a specific directory (remote path if attaching)
+opencode run --dir src/api "review this directory"
+
+# Spin up a local server with basic auth for the run
+opencode run --port 4097 -u admin -p secret "draft the API spec"
+
 # Continue / fork / share from a run
 opencode run -c "add tests for utils.ts"
 opencode run -s <sessionID> --fork "try a different approach"
