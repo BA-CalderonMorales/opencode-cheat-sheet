@@ -683,6 +683,16 @@ opencode run --title "Spike: auth refactor" "plan the work"
 # Headless HTTP server (API access, no TUI)
 opencode serve --port 4096
 
+# Bind to a specific hostname
+opencode serve --hostname 0.0.0.0 --port 4096
+
+# Advertise via mDNS so other devices can discover the server
+opencode serve --mdns                     # defaults hostname to 0.0.0.0
+opencode serve --mdns --mdns-domain dev.local   # custom domain (default: opencode.local)
+
+# Allow browser clients from additional origins
+opencode serve --cors https://app.example.com
+
 # Headless server + web interface (opens browser)
 opencode web --port 4096
 
@@ -698,6 +708,8 @@ opencode github install     # Sets up the repo GitHub Actions workflow
 ```
 
 Set `OPENCODE_SERVER_PASSWORD` to require HTTP basic auth on `serve`/`web`.
+Same flags apply to `opencode web` and `opencode acp`; the server config keys are
+`hostname`, `mdns`, `mdnsDomain`, and `cors`.
 See [Server](https://opencode.ai/docs/server/) and [ACP](https://opencode.ai/docs/acp/).
 
 </details>
