@@ -10,7 +10,7 @@ A reference for developers who want to leverage OpenCode's agentic capabilities 
 
 > **Note:** This is a **Beta** sheet. OpenCode moves fast — we're still aligning every command and example against the live CLI and docs. If something is off (or you quietly notice it isn't), tell us. Until then, treat this as a living draft and verify the surprising bits against the [official OpenCode documentation](https://opencode.ai/docs).
 
-**Based on official OpenCode documentation** — Commands verified against the [OpenCode docs](https://opencode.ai/docs) and `opencode --help` (v1.18.3). For the most up-to-date information, always refer to the official docs.
+**Based on official OpenCode documentation** — Commands verified against the [OpenCode docs](https://opencode.ai/docs) and `opencode --help` (v1.18.27). For the most up-to-date information, always refer to the official docs.
 
 </div>
 
@@ -1004,11 +1004,11 @@ MIT License — Free to use and modify.
 
 ---
 
-**Last updated: July 2026**
-**Based on**: OpenCode CLI (npm: opencode-ai, v1.18.3)
+**Last updated: September 2026**
+**Based on**: OpenCode CLI (npm: opencode-ai, v1.18.27)
 
 *This is a Beta reference. Commands and examples are verified against `opencode --help` and the official docs, but OpenCode evolves quickly — flag anything that drifts.*
 
-*Last synced: 2026-07-19 via [workspace manager](https://github.com/BA-CalderonMorales)*
+*Last synced: 2026-09-03 via [workspace manager](https://github.com/BA-CalderonMorales)*
 
 ---
