@@ -296,6 +296,11 @@ opencode run --auto "refactor src/"
 
 # Attach to a running server (avoids MCP cold boots)
 opencode run --attach http://localhost:4096 "explain async/await"
+
+# Mini interface (also on opencode attach)
+opencode --mini                    # Start the minimal interactive interface
+opencode --mini --no-replay        # Disable mini session history replay on resume/resize
+opencode --mini --replay-limit 20  # Cap visible mini replay to newest N messages
 ```
 
 </details>
@@ -899,6 +904,9 @@ when not installed via a package manager).
 | `--prompt` | Prompt to use |
 | `--agent` | Agent to use |
 | `--auto` | Auto-approve non-denied permissions (dangerous) |
+| `--mini` | Start the minimal interactive interface |
+| `--no-replay` | Disable mini session history replay on resume and after resize |
+| `--replay-limit` | Cap visible mini replay to the newest N messages |
 | `--pure` | Run without external plugins |
 | `-v, --version` | Print version number |
 | `-h, --help` | Show help |
