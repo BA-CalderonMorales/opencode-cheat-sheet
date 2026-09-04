@@ -100,14 +100,16 @@ opencode
 opencode /path/to/project
 
 # Authenticate a provider (stores keys in ~/.local/share/opencode/auth.json)
-opencode auth login
+opencode providers login
 
 # List authenticated providers
-opencode auth ls
+opencode providers ls
 
 # Log out of a provider
-opencode auth logout
+opencode providers logout
 ```
+
+`opencode providers` manages AI providers and credentials (`auth` is an alias).
 
 In the TUI, `/connect` opens the same provider setup flow and points you to
 [opencode.ai/auth](https://opencode.ai/auth) for API keys. You can also sign in
@@ -865,7 +867,8 @@ when not installed via a package manager).
 |---------|-------------|
 | `opencode` | Start the TUI in the current directory (or `[project]`) |
 | `opencode run [msg]` | Run a prompt non-interactively |
-| `opencode auth` | Manage provider credentials (`login`, `list`/`ls`, `logout`) |
+| `opencode completion` | Generate shell completion script |
+| `opencode providers` | Manage AI providers and credentials (`login`, `list`/`ls`, `logout`; alias: `auth`) |
 | `opencode models [provider]` | List available models |
 | `opencode mcp` | Manage MCP servers (`add`, `list`/`ls`, `auth`, `logout`, `debug`) |
 | `opencode agent` | Manage agents (`create`, `list`) |
