@@ -29,8 +29,15 @@ bun install -g opencode-ai
 # Or with pnpm
 pnpm install -g opencode-ai
 
+# Or with Yarn
+yarn global add opencode-ai
+
 # Or with Homebrew (most up to date: the OpenCode tap)
 brew install anomalyco/tap/opencode
+
+# Or on Arch Linux (stable / AUR)
+sudo pacman -S opencode
+paru -S opencode-bin
 
 # Launch OpenCode in the current project
 cd /path/to/project
@@ -66,9 +73,14 @@ curl -fsSL https://opencode.ai/install | bash
 npm install -g opencode-ai
 bun install -g opencode-ai
 pnpm install -g opencode-ai
+yarn global add opencode-ai
 
 # Homebrew (macOS / Linux) — the OpenCode tap is most current
 brew install anomalyco/tap/opencode
+
+# Arch Linux (stable / latest from AUR)
+sudo pacman -S opencode
+paru -S opencode-bin
 
 # Verify installation
 opencode --version
@@ -85,7 +97,15 @@ scoop install opencode
 
 # npm
 npm install -g opencode-ai
+
+# Mise
+mise use -g github:anomalyco/opencode
+
+# Docker
+docker run -it --rm ghcr.io/anomalyco/opencode
 ```
+
+Support for installing OpenCode on Windows using Bun is currently in progress.
 
 </details>
 
@@ -322,6 +342,10 @@ both formats and loads from several locations, **merged** (not replaced):
 4. Project config — `opencode.json` in the project root (highest standard precedence)
 5. `.opencode/` directories — agents, commands, skills, plugins
 6. Inline — `OPENCODE_CONFIG_CONTENT` env var
+7. Managed config files — macOS `/Library/Application Support/opencode/`, Linux
+   `/etc/opencode/`, Windows `%ProgramData%\opencode` (admin-controlled)
+8. macOS managed preferences — `.mobileconfig` via MDM (`ai.opencode.managed`,
+   highest priority, not user-overridable)
 
 ```jsonc
 {
@@ -447,7 +471,8 @@ can scope bash precisely:
 ```
 
 Available permission keys: `read`, `edit`, `glob`, `grep`, `list`, `bash`, `task`,
-`external_directory`, `todowrite`, `webfetch`, `websearch`, `lsp`, `skill`, `question`.
+`external_directory`, `todowrite`, `webfetch`, `websearch`, `lsp`, `skill`, `question`,
+`doom_loop` (recovery prompt when the same tool call repeats 3 times with identical input).
 See [Permissions](https://opencode.ai/docs/permissions/) for details.
 
 </details>
@@ -468,6 +493,10 @@ See [Permissions](https://opencode.ai/docs/permissions/) for details.
   name: your-skill-name          # required, 1-64 chars, lowercase + hyphens only
   description: when/why to use   # required, 1-1024 chars
   license: MIT                   # optional
+  compatibility: opencode        # optional
+  metadata:                      # optional, string-to-string map
+    audience: maintainers
+    workflow: github
   ---
   
   # Optional body (loaded on demand)
@@ -1023,11 +1052,27 @@ OpenCode is an assistant, not a replacement for your judgment:
 - [Config Reference](https://opencode.ai/docs/config/) — `opencode.json` schema
 - [Agents](https://opencode.ai/docs/agents/) — Built-in and custom agents
 - [Agent Skills](https://opencode.ai/docs/skills/) — Reusable SKILL.md capabilities
+- [IDE](https://opencode.ai/docs/ide/) — Desktop app and IDE extension
+- [Web](https://opencode.ai/docs/web/) — Web interface
+- [Go](https://opencode.ai/docs/go/) — Go SDK
 - [Commands](https://opencode.ai/docs/commands/) — Custom commands
 - [MCP Servers](https://opencode.ai/docs/mcp-servers/) — External tool integration
 - [Permissions](https://opencode.ai/docs/permissions/) — Approval policies
-- [Share](https://opencode.ai/docs/share/) — Session sharing
+- [Policies](https://opencode.ai/docs/policies/) — Allow/deny actions on configured resources
+- [Rules](https://opencode.ai/docs/rules/) — AGENTS.md and instruction files
+- [Models](https://opencode.ai/docs/models/) — Model configuration and local models
+- [Themes](https://opencode.ai/docs/themes/) — UI themes
+- [Keybinds](https://opencode.ai/docs/keybinds/) — Keyboard shortcuts
+- [Formatters](https://opencode.ai/docs/formatters/) — Code formatting
+- [LSP Servers](https://opencode.ai/docs/lsp/) — Language server integration
+- [Custom Tools](https://opencode.ai/docs/custom-tools/) — Custom tool definitions
+- [References](https://opencode.ai/docs/references/) — File references
+- [SDK](https://opencode.ai/docs/sdk/) — Build on OpenCode
+- [Network](https://opencode.ai/docs/network/) — Network configuration
+- [Enterprise](https://opencode.ai/docs/enterprise/) — Enterprise setup
 - [GitHub Agent](https://opencode.ai/docs/github/) — Repo automation
+- [GitLab Agent](https://opencode.ai/docs/gitlab/) — GitLab integration
+- [Share](https://opencode.ai/docs/share/) — Session sharing
 - [Troubleshooting](https://opencode.ai/docs/troubleshooting/)
 
 **Repository & Community:**
