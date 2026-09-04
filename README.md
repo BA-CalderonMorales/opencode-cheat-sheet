@@ -10,7 +10,7 @@ A reference for developers who want to leverage OpenCode's agentic capabilities 
 
 > **Note:** This is a **Beta** sheet. OpenCode moves fast — we're still aligning every command and example against the live CLI and docs. If something is off (or you quietly notice it isn't), tell us. Until then, treat this as a living draft and verify the surprising bits against the [official OpenCode documentation](https://opencode.ai/docs).
 
-**Based on official OpenCode documentation** — Commands verified against the [OpenCode docs](https://opencode.ai/docs) and `opencode --help` (v1.18.3). For the most up-to-date information, always refer to the official docs.
+**Based on official OpenCode documentation** — Commands verified against the [OpenCode docs](https://opencode.ai/docs) and `opencode --help` (v1.18.27). For the most up-to-date information, always refer to the official docs.
 
 </div>
 
@@ -29,8 +29,15 @@ bun install -g opencode-ai
 # Or with pnpm
 pnpm install -g opencode-ai
 
+# Or with Yarn
+yarn global add opencode-ai
+
 # Or with Homebrew (most up to date: the OpenCode tap)
 brew install anomalyco/tap/opencode
+
+# Or on Arch Linux (stable / AUR)
+sudo pacman -S opencode
+paru -S opencode-bin
 
 # Launch OpenCode in the current project
 cd /path/to/project
@@ -66,9 +73,14 @@ curl -fsSL https://opencode.ai/install | bash
 npm install -g opencode-ai
 bun install -g opencode-ai
 pnpm install -g opencode-ai
+yarn global add opencode-ai
 
 # Homebrew (macOS / Linux) — the OpenCode tap is most current
 brew install anomalyco/tap/opencode
+
+# Arch Linux (stable / latest from AUR)
+sudo pacman -S opencode
+paru -S opencode-bin
 
 # Verify installation
 opencode --version
@@ -85,7 +97,15 @@ scoop install opencode
 
 # npm
 npm install -g opencode-ai
+
+# Mise
+mise use -g github:anomalyco/opencode
+
+# Docker
+docker run -it --rm ghcr.io/anomalyco/opencode
 ```
+
+Support for installing OpenCode on Windows using Bun is currently in progress.
 
 </details>
 
@@ -100,14 +120,16 @@ opencode
 opencode /path/to/project
 
 # Authenticate a provider (stores keys in ~/.local/share/opencode/auth.json)
-opencode auth login
+opencode providers login
 
 # List authenticated providers
-opencode auth ls
+opencode providers ls
 
 # Log out of a provider
-opencode auth logout
+opencode providers logout
 ```
+
+`opencode providers` manages AI providers and credentials (`auth` is an alias).
 
 In the TUI, `/connect` opens the same provider setup flow and points you to
 [opencode.ai/auth](https://opencode.ai/auth) for API keys. You can also sign in
@@ -254,6 +276,7 @@ Subagents (invoke with `@` in a message):
 # From the CLI
 opencode session list                 # List all sessions
 opencode session list -n 10           # Last 10 sessions
+opencode session list --format json   # Output as JSON (table is default)
 opencode session delete <sessionID>   # Delete a session
 
 # Continue the last session
@@ -294,6 +317,11 @@ opencode run --auto "refactor src/"
 
 # Attach to a running server (avoids MCP cold boots)
 opencode run --attach http://localhost:4096 "explain async/await"
+
+# Mini interface (also on opencode attach)
+opencode --mini                    # Start the minimal interactive interface
+opencode --mini --no-replay        # Disable mini session history replay on resume/resize
+opencode --mini --replay-limit 20  # Cap visible mini replay to newest N messages
 ```
 
 </details>
@@ -314,6 +342,10 @@ both formats and loads from several locations, **merged** (not replaced):
 4. Project config — `opencode.json` in the project root (highest standard precedence)
 5. `.opencode/` directories — agents, commands, skills, plugins
 6. Inline — `OPENCODE_CONFIG_CONTENT` env var
+7. Managed config files — macOS `/Library/Application Support/opencode/`, Linux
+   `/etc/opencode/`, Windows `%ProgramData%\opencode` (admin-controlled)
+8. macOS managed preferences — `.mobileconfig` via MDM (`ai.opencode.managed`,
+   highest priority, not user-overridable)
 
 ```jsonc
 {
@@ -439,7 +471,8 @@ can scope bash precisely:
 ```
 
 Available permission keys: `read`, `edit`, `glob`, `grep`, `list`, `bash`, `task`,
-`external_directory`, `todowrite`, `webfetch`, `websearch`, `lsp`, `skill`, `question`.
+`external_directory`, `todowrite`, `webfetch`, `websearch`, `lsp`, `skill`, `question`,
+`doom_loop` (recovery prompt when the same tool call repeats 3 times with identical input).
 See [Permissions](https://opencode.ai/docs/permissions/) for details.
 
 </details>
@@ -460,6 +493,10 @@ See [Permissions](https://opencode.ai/docs/permissions/) for details.
   name: your-skill-name          # required, 1-64 chars, lowercase + hyphens only
   description: when/why to use   # required, 1-1024 chars
   license: MIT                   # optional
+  compatibility: opencode        # optional
+  metadata:                      # optional, string-to-string map
+    audience: maintainers
+    workflow: github
   ---
   
   # Optional body (loaded on demand)
@@ -594,6 +631,7 @@ opencode agent list                       # List all available agents
 opencode agent create                     # Interactive agent creator
 opencode agent create --path .opencode/agents \
   --description "Docs writer" --mode subagent --permissions "read,bash:deny"
+  # --permissions accepts the alias --tools
 ```
 
 Built-in modes: `primary` (interact directly, cycle with Tab), `subagent` (invoke
@@ -651,6 +689,22 @@ opencode run -f src/app.ts "review this file"
 # Output raw JSON events (for automation)
 opencode run --format json "list the exported functions in main.go"
 
+# Run a CLI command non-interactively (message is used for args)
+opencode run --command "git log" "summarize recent commits"
+
+# Show thinking blocks / set a model variant (reasoning effort)
+opencode run --thinking "debug this stack trace"
+opencode run --variant high "optimize this query"
+
+# Run in direct interactive split-footer mode
+opencode run -i "walk through the refactor"
+
+# Run in a specific directory (remote path if attaching)
+opencode run --dir src/api "review this directory"
+
+# Spin up a local server with basic auth for the run
+opencode run --port 4097 -u admin -p secret "draft the API spec"
+
 # Continue / fork / share from a run
 opencode run -c "add tests for utils.ts"
 opencode run -s <sessionID> --fork "try a different approach"
@@ -676,6 +730,16 @@ opencode run --title "Spike: auth refactor" "plan the work"
 # Headless HTTP server (API access, no TUI)
 opencode serve --port 4096
 
+# Bind to a specific hostname
+opencode serve --hostname 0.0.0.0 --port 4096
+
+# Advertise via mDNS so other devices can discover the server
+opencode serve --mdns                     # defaults hostname to 0.0.0.0
+opencode serve --mdns --mdns-domain dev.local   # custom domain (default: opencode.local)
+
+# Allow browser clients from additional origins
+opencode serve --cors https://app.example.com
+
 # Headless server + web interface (opens browser)
 opencode web --port 4096
 
@@ -687,10 +751,14 @@ opencode acp
 
 # Run the GitHub agent (typically in Actions)
 opencode github run
+opencode github run --event push         # Mock event for local testing
+opencode github run --token github_pat_********   # Pass a PAT explicitly
 opencode github install     # Sets up the repo GitHub Actions workflow
 ```
 
 Set `OPENCODE_SERVER_PASSWORD` to require HTTP basic auth on `serve`/`web`.
+Same flags apply to `opencode web` and `opencode acp`; the server config keys are
+`hostname`, `mdns`, `mdnsDomain`, and `cors`.
 See [Server](https://opencode.ai/docs/server/) and [ACP](https://opencode.ai/docs/acp/).
 
 </details>
@@ -738,6 +806,9 @@ opencode stats --days 30
 
 # Top models breakdown
 opencode stats --models 5
+
+# Top tools breakdown
+opencode stats --tools 5
 
 # Filter by project
 opencode stats --project /path/to/project
@@ -820,7 +891,8 @@ npm via the `plugin` config key. See [Plugins](https://opencode.ai/docs/plugins/
 # Inspect the fully resolved config (incl. managed settings)
 opencode debug config
 
-# Other debug tooling
+# Other debug tooling: lsp, rg, file, scrap, skill, snapshot, startup,
+# agent <name>, v2, info, paths, wait
 opencode debug
 
 # Database tools
@@ -829,7 +901,9 @@ opencode db <query>         # Run a query (--format json|tsv)
 
 # Uninstall OpenCode
 opencode uninstall --keep-config   # keep config files
+opencode uninstall --keep-data     # keep session data and snapshots
 opencode uninstall --dry-run       # preview what gets removed
+opencode uninstall -f              # skip confirmation prompts
 ```
 
 When a remote MCP server fails to authenticate, `opencode mcp debug <name>` shows
@@ -848,6 +922,9 @@ opencode upgrade
 # Upgrade to a specific version
 opencode upgrade v0.1.48
 
+# Force a specific install method (curl, npm, pnpm, bun, brew, choco, scoop)
+opencode upgrade -m brew
+
 # Disable autoupdate checks
 export OPENCODE_DISABLE_AUTOUPDATE=1
 ```
@@ -865,7 +942,8 @@ when not installed via a package manager).
 |---------|-------------|
 | `opencode` | Start the TUI in the current directory (or `[project]`) |
 | `opencode run [msg]` | Run a prompt non-interactively |
-| `opencode auth` | Manage provider credentials (`login`, `list`/`ls`, `logout`) |
+| `opencode completion` | Generate shell completion script |
+| `opencode providers` | Manage AI providers and credentials (`login`, `list`/`ls`, `logout`; alias: `auth`) |
 | `opencode models [provider]` | List available models |
 | `opencode mcp` | Manage MCP servers (`add`, `list`/`ls`, `auth`, `logout`, `debug`) |
 | `opencode agent` | Manage agents (`create`, `list`) |
@@ -896,6 +974,9 @@ when not installed via a package manager).
 | `--prompt` | Prompt to use |
 | `--agent` | Agent to use |
 | `--auto` | Auto-approve non-denied permissions (dangerous) |
+| `--mini` | Start the minimal interactive interface |
+| `--no-replay` | Disable mini session history replay on resume and after resize |
+| `--replay-limit` | Cap visible mini replay to the newest N messages |
 | `--pure` | Run without external plugins |
 | `-v, --version` | Print version number |
 | `-h, --help` | Show help |
@@ -971,11 +1052,27 @@ OpenCode is an assistant, not a replacement for your judgment:
 - [Config Reference](https://opencode.ai/docs/config/) — `opencode.json` schema
 - [Agents](https://opencode.ai/docs/agents/) — Built-in and custom agents
 - [Agent Skills](https://opencode.ai/docs/skills/) — Reusable SKILL.md capabilities
+- [IDE](https://opencode.ai/docs/ide/) — Desktop app and IDE extension
+- [Web](https://opencode.ai/docs/web/) — Web interface
+- [Go](https://opencode.ai/docs/go/) — Go SDK
 - [Commands](https://opencode.ai/docs/commands/) — Custom commands
 - [MCP Servers](https://opencode.ai/docs/mcp-servers/) — External tool integration
 - [Permissions](https://opencode.ai/docs/permissions/) — Approval policies
-- [Share](https://opencode.ai/docs/share/) — Session sharing
+- [Policies](https://opencode.ai/docs/policies/) — Allow/deny actions on configured resources
+- [Rules](https://opencode.ai/docs/rules/) — AGENTS.md and instruction files
+- [Models](https://opencode.ai/docs/models/) — Model configuration and local models
+- [Themes](https://opencode.ai/docs/themes/) — UI themes
+- [Keybinds](https://opencode.ai/docs/keybinds/) — Keyboard shortcuts
+- [Formatters](https://opencode.ai/docs/formatters/) — Code formatting
+- [LSP Servers](https://opencode.ai/docs/lsp/) — Language server integration
+- [Custom Tools](https://opencode.ai/docs/custom-tools/) — Custom tool definitions
+- [References](https://opencode.ai/docs/references/) — File references
+- [SDK](https://opencode.ai/docs/sdk/) — Build on OpenCode
+- [Network](https://opencode.ai/docs/network/) — Network configuration
+- [Enterprise](https://opencode.ai/docs/enterprise/) — Enterprise setup
 - [GitHub Agent](https://opencode.ai/docs/github/) — Repo automation
+- [GitLab Agent](https://opencode.ai/docs/gitlab/) — GitLab integration
+- [Share](https://opencode.ai/docs/share/) — Session sharing
 - [Troubleshooting](https://opencode.ai/docs/troubleshooting/)
 
 **Repository & Community:**
@@ -1004,11 +1101,11 @@ MIT License — Free to use and modify.
 
 ---
 
-**Last updated: July 2026**
-**Based on**: OpenCode CLI (npm: opencode-ai, v1.18.3)
+**Last updated: September 2026**
+**Based on**: OpenCode CLI (npm: opencode-ai, v1.18.27)
 
 *This is a Beta reference. Commands and examples are verified against `opencode --help` and the official docs, but OpenCode evolves quickly — flag anything that drifts.*
 
-*Last synced: 2026-07-19 via [workspace manager](https://github.com/BA-CalderonMorales)*
+*Last synced: 2026-09-03 via [workspace manager](https://github.com/BA-CalderonMorales)*
 
 ---
