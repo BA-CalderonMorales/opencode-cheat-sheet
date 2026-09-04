@@ -256,6 +256,7 @@ Subagents (invoke with `@` in a message):
 # From the CLI
 opencode session list                 # List all sessions
 opencode session list -n 10           # Last 10 sessions
+opencode session list --format json   # Output as JSON (table is default)
 opencode session delete <sessionID>   # Delete a session
 
 # Continue the last session
@@ -601,6 +602,7 @@ opencode agent list                       # List all available agents
 opencode agent create                     # Interactive agent creator
 opencode agent create --path .opencode/agents \
   --description "Docs writer" --mode subagent --permissions "read,bash:deny"
+  # --permissions accepts the alias --tools
 ```
 
 Built-in modes: `primary` (interact directly, cycle with Tab), `subagent` (invoke
@@ -720,6 +722,8 @@ opencode acp
 
 # Run the GitHub agent (typically in Actions)
 opencode github run
+opencode github run --event push         # Mock event for local testing
+opencode github run --token github_pat_********   # Pass a PAT explicitly
 opencode github install     # Sets up the repo GitHub Actions workflow
 ```
 
@@ -773,6 +777,9 @@ opencode stats --days 30
 
 # Top models breakdown
 opencode stats --models 5
+
+# Top tools breakdown
+opencode stats --tools 5
 
 # Filter by project
 opencode stats --project /path/to/project
@@ -855,7 +862,8 @@ npm via the `plugin` config key. See [Plugins](https://opencode.ai/docs/plugins/
 # Inspect the fully resolved config (incl. managed settings)
 opencode debug config
 
-# Other debug tooling
+# Other debug tooling: lsp, rg, file, scrap, skill, snapshot, startup,
+# agent <name>, v2, info, paths, wait
 opencode debug
 
 # Database tools
@@ -864,7 +872,9 @@ opencode db <query>         # Run a query (--format json|tsv)
 
 # Uninstall OpenCode
 opencode uninstall --keep-config   # keep config files
+opencode uninstall --keep-data     # keep session data and snapshots
 opencode uninstall --dry-run       # preview what gets removed
+opencode uninstall -f              # skip confirmation prompts
 ```
 
 When a remote MCP server fails to authenticate, `opencode mcp debug <name>` shows
@@ -882,6 +892,9 @@ opencode upgrade
 
 # Upgrade to a specific version
 opencode upgrade v0.1.48
+
+# Force a specific install method (curl, npm, pnpm, bun, brew, choco, scoop)
+opencode upgrade -m brew
 
 # Disable autoupdate checks
 export OPENCODE_DISABLE_AUTOUPDATE=1
