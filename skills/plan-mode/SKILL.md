@@ -1,6 +1,6 @@
 ---
 name: plan-mode
-description: Use OpenCode Plan agent and Tab switching to propose changes before editing
+description: Use the OpenCode v2 Plan agent and Shift+Tab switching to propose changes before editing
 ---
 
 # Plan Mode
@@ -15,14 +15,14 @@ Separate thinking from doing: get a proposal, review it, then approve edits.
 
 ## Steps
 
-1. Press **Tab** to switch to the **Plan** agent (read-only; `edit`/`bash` ask by default).
+1. Press **Shift+Tab** to switch to the **Plan** agent (read-only for project files; `edit` is denied outside `~/.opencode/plan`).
 2. Describe the feature with context and examples:
    ```
    When a user deletes a note, flag it deleted in the DB, then build a screen
    listing recently deleted notes with undelete / permanent delete.
    ```
 3. Review the plan and iterate.
-4. Press **Tab** back to **Build**, then:
+4. Press **Shift+Tab** back to **Build**, then:
    ```
    Sounds good! Go ahead and make the changes.
    ```
@@ -35,5 +35,5 @@ Make Plan the default agent project-wide:
 { "default_agent": "plan" }
 ```
 
-You can also scope a custom command to the plan agent — see https://opencode.ai/docs/commands/
-See https://opencode.ai/docs/agents/
+You can also scope a custom command to the plan agent — see https://opencode.ai/v2/docs/commands/
+See https://opencode.ai/v2/docs/agents/

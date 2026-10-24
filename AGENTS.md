@@ -11,8 +11,9 @@
   is the CI gate (shared org-level scan, Trivy by default).
 - Community surface: `CLAUDE.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
   `LICENSE`.
-- The sheet is Beta: commands and examples are still being aligned against
-  the live CLI and docs; uncertainty is called out, never guessed.
+- The sheet is a reference for **OpenCode v2** (`npm @opencode/cli`). v1
+  commands (`agent`, `attach`, `web`, `github`, `pr`, `db`, top-level
+  `export`/`import`, `providers`) are documented only as migration notes.
 - Pre-rewrite leftovers are pruned; use Git history for legacy reference.
 
 ## Key Sections
@@ -22,7 +23,7 @@
 | The sheet: levels, commands, examples | `README.md` |
 | On-disk skills and how to invoke them | `skills/` |
 | Contribution flow and standards | `CONTRIBUTING.md` |
-| Official OpenCode truth | [opencode.ai/docs](https://opencode.ai/docs) |
+| Official OpenCode truth | [opencode.ai/v2/docs](https://opencode.ai/v2/docs/) |
 | Security gate behavior | `.github/workflows/security-scan.yml` |
 
 Lost in the woods? Start with `README.md` for *what the sheet covers*, then
@@ -43,9 +44,10 @@ Lost in the woods? Start with `README.md` for *what the sheet covers*, then
 
 ## Rules
 
-- Accuracy first: verify commands with `opencode --help` and the live docs
-  at opencode.ai/docs before documenting; this sheet is Beta, so call out
-  uncertainty rather than guessing.
+- Accuracy first: verify commands with `opencode --help` and the live v2 docs
+  at opencode.ai/v2/docs before documenting. Note that `opencode.ai/docs`
+  still serves the v1 documentation for some pages, so confirm the version
+  a page describes before trusting it.
 - Maintain consistent formatting with collapsible `<details>` sections;
   minimal emojis, used for structure, not decoration.
 - Update the "Last updated" date in the README with each change batch.

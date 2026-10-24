@@ -1,51 +1,38 @@
 <div align="center">
 
-# OpenCode Cheat Sheet (Beta)
+# OpenCode Cheat Sheet
 
 <a href="https://opencode.ai/"><img width="1062" height="597" alt="OpenCode cheat sheet" src="assets/image.png" /></a>
 
-> **Your practical guide to using OpenCode effectively — from first run to advanced agentic workflows.**
-
-A reference for developers who want to leverage OpenCode's agentic capabilities while staying in control. Focuses on patterns that augment your thinking, not replace it.
-
-> **Note:** This is a **Beta** sheet. OpenCode moves fast — we're still aligning every command and example against the live CLI and docs. If something is off (or you quietly notice it isn't), tell us. Until then, treat this as a living draft and verify the surprising bits against the [official OpenCode documentation](https://opencode.ai/docs).
-
-**Based on official OpenCode documentation** — Commands verified against the [OpenCode docs](https://opencode.ai/docs) and `opencode --help` (v1.18.27). For the most up-to-date information, always refer to the official docs.
+> A working reference for OpenCode v2. Every command below was checked against `opencode 2.1.4` and the [v2 docs](https://opencode.ai/v2/docs/).
 
 </div>
+
+> **Coming from OpenCode v1?** v2 changed a lot. The CLI commands `agent`, `attach`, `web`, `github`, `pr`, `db`, and top-level `export`/`import` are gone. `providers` is now `auth`, `--mini` is now the `mini` subcommand, and `tui.json` is now a single global `cli.json`. See [Migrating from v1](#migrating-from-v1).
 
 ## Quick Start
 
 ```bash
-# Install with the official install script (recommended)
-curl -fsSL https://opencode.ai/install | bash
+# Install v2 (recommended)
+curl -fsSL https://opencode.ai/v2/install | bash
 
-# Or with Node.js
-npm install -g opencode-ai
+# Or with a package manager
+npm install -g @opencode/cli
+bun install -g --trust @opencode/cli
+pnpm add -g --allow-build=@opencode/cli @opencode/cli
+yarn global add @opencode/cli
+brew install anomalyco/tap/opencode-v2
+vp install -g @opencode/cli
+mise use -g opencode
+paru -S opencode-beta
 
-# Or with Bun
-bun install -g opencode-ai
-
-# Or with pnpm
-pnpm install -g opencode-ai
-
-# Or with Yarn
-yarn global add opencode-ai
-
-# Or with Homebrew (most up to date: the OpenCode tap)
-brew install anomalyco/tap/opencode
-
-# Or on Arch Linux (stable / AUR)
-sudo pacman -S opencode
-paru -S opencode-bin
-
-# Launch OpenCode in the current project
+# Launch and check the version
 cd /path/to/project
 opencode
-
-# Check version
 opencode --version
 ```
+
+The npm package uses a postinstall script to pick the right native binary. Bun and pnpm need the extra flag above to allow that script.
 
 ## Table of Contents
 
@@ -56,84 +43,54 @@ opencode --version
 - **[Level 4: Advanced Features](#level-4-advanced-features)**
 - **[Level 5: Expert Workflows](#level-5-expert-workflows)**
 - **[Command Reference](#command-reference)**
+- **[Migrating from v1](#migrating-from-v1)**
 - **[Best Practices](#best-practices)**
 
 ## Level 1: Getting Started
 
-Essential commands to start using OpenCode effectively.
-
 <details>
-<summary><strong>Installation & Setup</strong></summary>
+<summary><strong>Installation</strong></summary>
 
 ```bash
-# Install with the official script
-curl -fsSL https://opencode.ai/install | bash
+curl -fsSL https://opencode.ai/v2/install | bash
 
-# Or with a package manager
-npm install -g opencode-ai
-bun install -g opencode-ai
-pnpm install -g opencode-ai
-yarn global add opencode-ai
+npm install -g @opencode/cli
+bun install -g --trust @opencode/cli
+pnpm add -g --allow-build=@opencode/cli @opencode/cli
+yarn global add @opencode/cli
+brew install anomalyco/tap/opencode-v2
+vp install -g @opencode/cli
+mise use -g opencode
+paru -S opencode-beta
 
-# Homebrew (macOS / Linux) — the OpenCode tap is most current
-brew install anomalyco/tap/opencode
-
-# Arch Linux (stable / latest from AUR)
-sudo pacman -S opencode
-paru -S opencode-bin
-
-# Verify installation
 opencode --version
 ```
 
-On Windows, OpenCode recommends WSL. Native options also exist:
+Windows package managers are not supported. Use WSL, or download a standalone binary from [opencode.ai](https://opencode.ai/v2/docs/).
+
+Docker images use versioned tags:
 
 ```bash
-# Chocolatey
-choco install opencode
-
-# Scoop
-scoop install opencode
-
-# npm
-npm install -g opencode-ai
-
-# Mise
-mise use -g github:anomalyco/opencode
-
-# Docker
-docker run -it --rm ghcr.io/anomalyco/opencode
+docker run -it --rm ghcr.io/anomalyco/opencode:2.0.0
 ```
-
-Support for installing OpenCode on Windows using Bun is currently in progress.
 
 </details>
 
 <details>
-<summary><strong>First Steps & Authentication</strong></summary>
+<summary><strong>First Steps and Authentication</strong></summary>
 
 ```bash
-# Start the TUI in the current directory
-opencode
+opencode                          # TUI in the current directory
+opencode /path/to/project         # TUI in a specific project
 
-# Start for a specific project path
-opencode /path/to/project
-
-# Authenticate a provider (stores keys in ~/.local/share/opencode/auth.json)
-opencode providers login
-
-# List authenticated providers
-opencode providers ls
-
-# Log out of a provider
-opencode providers logout
+opencode auth login               # add a provider and paste its API key
+opencode auth list                # list authenticated providers
+opencode auth logout              # log out of a provider
 ```
 
-`opencode providers` manages AI providers and credentials (`auth` is an alias).
+Credentials live in `~/.local/share/opencode/auth.json`. In the TUI, `/connect` opens the same flow.
 
-In the TUI, `/connect` opens the same provider setup flow and points you to
-[opencode.ai/auth](https://opencode.ai/auth) for API keys. You can also sign in
-with GitHub (Copilot) or OpenAI (ChatGPT Plus/Pro) directly.
+OpenCode reads the provider list from [models.dev](https://models.dev), so `opencode auth login` works for any provider in that catalog, not just the ones OpenCode ships.
 
 </details>
 
@@ -141,13 +98,11 @@ with GitHub (Copilot) or OpenAI (ChatGPT Plus/Pro) directly.
 <summary><strong>Initialize a Project</strong></summary>
 
 ```bash
-# Inside the TUI, analyze the project and create an AGENTS.md
+# Inside the TUI
 /init
 ```
 
-`/init` generates an `AGENTS.md` in the project root with structure and coding
-patterns. Commit it to Git so OpenCode (and teammates) get project context on
-every run.
+`/init` walks the project and writes an `AGENTS.md` with the structure and conventions it found. Commit it so every session starts with the same context.
 
 </details>
 
@@ -155,78 +110,115 @@ every run.
 <summary><strong>Basic Navigation</strong></summary>
 
 ```bash
-# Keyboard shortcuts in the TUI (leader key: ctrl+x)
-ctrl+x n                  # New session (alias: /clear)
-ctrl+x l                  # List/switch sessions (alias: /sessions, /resume, /continue)
-ctrl+x u                  # Undo last message + file changes (needs Git repo)
-ctrl+x r                  # Redo an undone message
-ctrl+x c                  # Compact / summarize session (alias: /compact)
-ctrl+x e                  # Open external editor (alias: /editor)
-ctrl+x x                  # Export conversation to Markdown (alias: /export)
-ctrl+x q                  # Exit (alias: /exit, /quit, /q)
-ctrl+x m                  # List models (alias: /models)
-ctrl+x t                  # List themes (alias: /themes)
-
 # Message prefixes
-@path/to/file.ts         # Fuzzy file reference (adds file contents to context)
-!ls -la                  # Run a shell command inline
+@path/to/file.ts         # fuzzy file reference, contents go into context
+@src/auth.ts#20-45       # a line range
+!ls -la                  # run a shell command, output stays in the session
+
+# Keybinds (leader key: ctrl+x)
+ctrl+x n                  # new session
+ctrl+x l                  # list and switch sessions
+ctrl+x u                  # undo the last message and its file changes
+ctrl+x r                  # redo an undone message
+ctrl+x c                  # compact the session
+ctrl+x e                  # open the external editor
+ctrl+x x                  # export to Markdown
+ctrl+x m                  # list models
+ctrl+x a                  # list agents
+ctrl+x t                  # list themes
+ctrl+x q                  # exit
+ctrl+p                    # command palette
+shift+tab                 # cycle primary agents
+f2                        # cycle recently used models
+ctrl+t                    # cycle model variants
 ```
 
 </details>
 
 ## Level 2: Basic Commands
 
-Core patterns for everyday development.
-
 <details>
-<summary><strong>Slash Commands — Essentials</strong></summary>
+<summary><strong>Slash Commands</strong></summary>
 
-Use these inside an active OpenCode session (type `/` to see the popup).
+Type `/` in the TUI to see the list for your build. In v2:
 
 ```bash
-/connect                  # Add a provider and paste API keys
-/compact                  # Compact session context (alias: /summarize)
-/details                  # Toggle tool execution details
-/editor                   # Compose message in $EDITOR
-/exit                     # Quit OpenCode (aliases: /quit, /q)
-/export                   # Export conversation to Markdown
-/help                     # Show help dialog
-/init                     # Create or update AGENTS.md
-/models                   # List available models
-/new                      # Start a new session (alias: /clear)
-/redo                     # Redo an undone message
-/sessions                 # List and switch sessions (aliases: /resume, /continue)
-/share                    # Share current session (creates a link)
-/themes                   # List available themes
-/thinking                 # Toggle visibility of thinking/reasoning blocks
-/undo                     # Undo last message and its file changes
-/unshare                  # Unshare current session
+# Agent
+/agents                   # choose an agent
+/models                   # list models
+/variants                 # choose a reasoning variant (aliases: /thinking, /effort)
+
+# Session
+/new                      # start a new session
+/sessions                 # list and switch (aliases: /resume, /continue)
+/open                     # open a project (aliases: /projects, /project)
+/fork                     # fork the session
+/rename <arg>             # rename the session
+/timeline                 # session timeline
+/compact                  # compact the context
+/undo                     # undo the last message and its changes
+/redo                     # restore an undone message
+/clear                    # clear the transcript
+/copy                     # copy the last message
+/export                   # export to Markdown
+/worktrees                # list worktrees
+/cd <arg>                 # change directory
+
+# System
+/connect                  # add a provider
+/mcps                     # MCP servers
+/plugins                  # plugins
+/settings                 # settings
+/stats                    # usage statistics
+/status                   # session status
+/themes                   # list themes
+/update                   # check for and install an update
+/restart                  # restart the server
+/pair                     # pair a browser or app (alias: /web)
+/reload                   # reload configuration
+/highlights               # release notes
+/help                     # help dialog
+/exit                     # quit (aliases: /quit, /q)
+/debug                    # debug menu
+/diff                     # diff view
+/terminal                 # terminal panel
+
+# Other
+/btw <arg>                # side question, not added to the conversation
+/skills                   # list available skills
+/editor                   # compose in $EDITOR
 ```
+
+`/init` and `/review` are server-side commands. `/review` takes an optional commit, branch, or PR and defaults to uncommitted changes.
 
 </details>
 
 <details>
 <summary><strong>Agents: Build vs Plan</strong></summary>
 
-OpenCode ships two built-in primary agents you cycle between with the **Tab** key:
+v2 ships four visible agents. Switch between primary agents with **Shift+Tab**.
 
-- **Build** — the default agent, all tools enabled. Use for real implementation work.
-- **Plan** — read-only planning agent. `edit` and `bash` default to `ask`, so it
-  analyzes and proposes without changing your code. Great for "how should I
-  approach this?" before you commit to changes.
+- **Build** (`build`, primary) - the default, with full tool access.
+- **Plan** (`plan`, primary) - explores and plans without editing project files.
+- **General** (`general`, subagent) - multi-step work with broad tool access.
+- **Explore** (`explore`, subagent) - reads and searches code or web sources without editing.
 
-Subagents (invoke with `@` in a message):
+There is no `scout` agent in v2. That was a v1 built-in.
 
-```bash
-@general     # General-purpose agent; can make file changes, run in parallel
-@explore     # Fast, read-only codebase exploration
-@scout       # Read-only external docs / dependency research
+Subagents run in a child session. The parent agent's `subagent` permission decides which ones it may launch, and the child uses its own permissions.
+
+```jsonc
+{
+  "agents": {
+    "orchestrator": {
+      "permissions": [
+        { "action": "subagent", "resource": "*", "effect": "deny" },
+        { "action": "subagent", "resource": "reviewer", "effect": "allow" }
+      ]
+    }
+  }
+}
 ```
-
-**When to use each:**
-- **Build**: Default for implementation — full file + shell access.
-- **Plan**: Analyze, propose, review — no unintended changes.
-- **Explore/Scout**: Dig into a codebase or upstream docs without touching files.
 
 </details>
 
@@ -234,7 +226,7 @@ Subagents (invoke with `@` in a message):
 <summary><strong>File and Directory Operations</strong></summary>
 
 ```bash
-# Reference files with @ (fuzzy search in the working directory)
+# Reference files with @
 "How is auth handled in @packages/functions/src/api/index.ts?"
 
 # Reference a configured reference root
@@ -248,51 +240,22 @@ Subagents (invoke with `@` in a message):
 </details>
 
 <details>
-<summary><strong>Working with Code</strong></summary>
-
-```bash
-# Explain and analyze
-"Explain what this code does"
-"Review this function for bugs"
-
-# Generate and refactor
-"Write a function to parse JSON safely"
-"Refactor this module to use async/await"
-
-# Use Plan mode first for non-trivial changes
-# Press Tab -> describe the feature -> review the plan -> Tab -> "go ahead"
-```
-
-</details>
-
-<details>
 <summary><strong>Session Management</strong></summary>
 
 ```bash
-# In the TUI
-/new                       # Start a fresh session
-/sessions                  # List + switch (alias: /resume, /continue)
-
 # From the CLI
-opencode session list                 # List all sessions
-opencode session list -n 10           # Last 10 sessions
-opencode session list --format json   # Output as JSON (table is default)
-opencode session delete <sessionID>   # Delete a session
+opencode session list                 # list sessions in the current project
+opencode session list -n 10           # the 10 most recent
+opencode session list --format json   # JSON instead of a table
+opencode session delete <sessionID>   # delete a session and its children
+opencode session export <sessionID> --sanitize   # export as JSON, secrets redacted
+opencode session import session.json   # import from a file or URL
 
-# Continue the last session
-opencode -c
-opencode --continue
-
-# Resume a specific session
-opencode -s <sessionID>
-opencode --session <sessionID>
-
-# Fork a session (keeps the original intact)
-opencode -c --fork
+# Continue and fork
+opencode -c                           # continue the last session
+opencode -s <sessionID>               # resume a specific session
+opencode -c --fork                    # fork, keeping the original intact
 ```
-
-Sessions persist context — use them for multi-turn problem solving. `--fork`
-copies the session so you can explore a different direction safely.
 
 </details>
 
@@ -300,74 +263,62 @@ copies the session so you can explore a different direction safely.
 <summary><strong>Useful CLI Flags</strong></summary>
 
 ```bash
-# Model selection (provider/model format)
-opencode -m anthropic/claude-sonnet-4-5 "your prompt"
-opencode run -m opencode/gpt-5.1-codex "explain this"
+# Model selection (provider/model, optionally provider/model#variant)
+opencode -m anthropic/claude-sonnet-5-5 "your prompt"
+opencode run -m opencode/gpt-6.1-sol "explain this"
 
-# Continue / resume
-opencode -c                              # Continue last session
-opencode -s <sessionID> --fork           # Resume + fork
+# Continue, resume, fork
+opencode -c
+opencode -s <sessionID> --fork
 
 # Agent and prompt
 opencode --agent plan "draft a migration plan"
 opencode --prompt "summarize this repo"
 
-# Auto-approve (dangerous — skips permission prompts for non-denied actions)
+# Auto-approve anything not explicitly denied
 opencode run --auto "refactor src/"
 
-# Attach to a running server (avoids MCP cold boots)
-opencode run --attach http://localhost:4096 "explain async/await"
-
-# Mini interface (also on opencode attach)
-opencode --mini                    # Start the minimal interactive interface
-opencode --mini --no-replay        # Disable mini session history replay on resume/resize
-opencode --mini --replay-limit 20  # Cap visible mini replay to newest N messages
+# Connect to a server instead of the local one
+opencode run --server http://localhost:49374 "explain async/await"
+opencode --standalone                    # run a private server for this invocation
 ```
 
 </details>
 
 ## Level 3: Intermediate Usage
 
-Configuration and customization options.
-
 <details>
 <summary><strong>Configuration</strong></summary>
 
-OpenCode uses a JSON or JSONC config (`opencode.json` / `opencode.jsonc`). It supports
-both formats and loads from several locations, **merged** (not replaced):
+OpenCode uses JSON or JSONC (`opencode.json` / `opencode.jsonc`) and merges every file it finds, lowest precedence first:
 
-1. Remote config (`.well-known/opencode`) — org defaults
-2. Global config — `~/.config/opencode/opencode.json`
-3. Custom config — `OPENCODE_CONFIG` env var
-4. Project config — `opencode.json` in the project root (highest standard precedence)
-5. `.opencode/` directories — agents, commands, skills, plugins
-6. Inline — `OPENCODE_CONFIG_CONTENT` env var
-7. Managed config files — macOS `/Library/Application Support/opencode/`, Linux
-   `/etc/opencode/`, Windows `%ProgramData%\opencode` (admin-controlled)
-8. macOS managed preferences — `.mobileconfig` via MDM (`ai.opencode.managed`,
-   highest priority, not user-overridable)
+1. `~/.config/opencode/opencode.json(c)` - your user config
+2. `opencode.json(c)` files from the farthest ancestor directory down to the current one
+3. `opencode.json(c)` files inside `.opencode/` directories, in the same order. These override every direct config.
+4. The system directory: `/etc/opencode`, `/Library/Application Support/opencode`, or `%ProgramData%\opencode`
+5. macOS managed preferences for the `ai.opencode.managed` domain, which users and projects cannot override
 
 ```jsonc
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "anthropic/claude-sonnet-4-5",
-  "autoupdate": true,
-  "server": { "port": 4096 }
+  "model": "anthropic/claude-sonnet-5-5",
+  "default_agent": "build",
+  "update": "notify"
 }
 ```
 
-TUI-specific settings live in a separate `tui.json` (or `tui.jsonc`):
+Terminal settings live in one global file, `~/.config/opencode/cli.json`. There is no project-local equivalent, and v1's `tui.json` is migrated automatically on first v2 start.
 
 ```jsonc
 {
-  "$schema": "https://opencode.ai/tui.json",
-  "theme": "opencode",
-  "leader_timeout": 2000,
+  "$schema": "https://opencode.ai/v2/cli.json",
+  "theme": { "name": "opencode" },
+  "leader": { "timeout": 2000 },
   "keybinds": { "command_list": "ctrl+p" }
 }
 ```
 
-See [Config Reference](https://opencode.ai/docs/config/) for the full schema.
+See the [Config Reference](https://opencode.ai/v2/docs/config/) for the full schema.
 
 </details>
 
@@ -375,31 +326,21 @@ See [Config Reference](https://opencode.ai/docs/config/) for the full schema.
 <summary><strong>Model Selection</strong></summary>
 
 ```bash
-# List every model available across your configured providers
-opencode models
-
-# Filter by provider
-opencode models anthropic
-
-# Refresh the cached model list from models.dev
-opencode models --refresh
-
-# Verbose output includes costs/metadata
-opencode models --verbose
+opencode models                    # one provider/model ID per line
+opencode models anthropic          # filter by provider
 ```
 
-Set a default model in config:
+Set a default in config:
 
 ```jsonc
 {
-  "model": "anthropic/claude-sonnet-4-5",
-  "small_model": "anthropic/claude-haiku-4-5"
+  "model": "anthropic/claude-sonnet-5-5"
 }
 ```
 
-Model IDs use the `provider/model-id` format. With [OpenCode Zen](https://opencode.ai/zen)
-you can use curated entries like `opencode/gpt-5.1-codex`. Cycle reasoning variants
-with `ctrl+t` in the TUI.
+Model IDs are `provider/model`. Add `#variant` to pin a reasoning effort, as in `provider/model#high`. The root `model` value drops the variant; agent and command references keep it.
+
+OpenCode's own provider ID is `opencode`, covering the Zen and Console catalog. `opencode pair` and `/pair` in the TUI give you browser access.
 
 </details>
 
@@ -407,12 +348,9 @@ with `ctrl+t` in the TUI.
 <summary><strong>AGENTS.md for Project Context</strong></summary>
 
 ```bash
-# Run inside the TUI to generate AGENTS.md
+# Inside the TUI
 /init
 ```
-
-`AGENTS.md` (and any files referenced via `instructions` in config) gives OpenCode
-project-specific context. Commit it to Git.
 
 ```markdown
 # Project Guidelines
@@ -420,7 +358,7 @@ project-specific context. Commit it to Git.
 ## Tech Stack
 - Node.js with Fastify
 - PostgreSQL
-- Vitest for testing
+- Vitest
 
 ## Patterns
 - Use dependency injection
@@ -428,7 +366,7 @@ project-specific context. Commit it to Git.
 - Follow the existing ESLint rules
 ```
 
-You can also point OpenCode at instruction files globally:
+Point OpenCode at other instruction files with `instructions`:
 
 ```jsonc
 {
@@ -436,44 +374,40 @@ You can also point OpenCode at instruction files globally:
 }
 ```
 
+v2 discovers `AGENTS.md` but not `CLAUDE.md`.
+
 </details>
 
 <details>
 <summary><strong>Permissions</strong></summary>
 
-By default OpenCode **allows all operations** without prompting. Tighten that in config:
+v2 uses an ordered array of rules. The last matching rule wins, and no match means `ask`.
 
 ```jsonc
 {
-  "permission": {
-    "edit": "ask",
-    "bash": "ask"
-  }
+  "permissions": [
+    { "action": "shell", "resource": "*", "effect": "ask" },
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "git push *", "effect": "deny" }
+  ]
 }
 ```
 
-Permission values: `"allow"`, `"ask"`, `"deny"`. Keys accept glob patterns, so you
-can scope bash precisely:
+Actions in v2: `read`, `edit`, `glob`, `grep`, `shell`, `subagent`, `skill`, `question`, `webfetch`, `websearch`, `external_directory`, plus `<server>_<tool>` for MCP tools.
+
+Every agent starts with a base policy that allows everything, then asks before reading `*.env` and `*.env.*`. One thing to know: `external_directory` is allowed by default in v2. If you want the old prompt-before-outside-the-project behavior, add it yourself:
 
 ```jsonc
 {
-  "agent": {
-    "build": {
-      "permission": {
-        "bash": {
-          "*": "ask",
-          "git status *": "allow"
-        }
-      }
-    }
-  }
+  "permissions": [
+    { "action": "external_directory", "resource": "*", "effect": "ask" }
+  ]
 }
 ```
 
-Available permission keys: `read`, `edit`, `glob`, `grep`, `list`, `bash`, `task`,
-`external_directory`, `todowrite`, `webfetch`, `websearch`, `lsp`, `skill`, `question`,
-`doom_loop` (recovery prompt when the same tool call repeats 3 times with identical input).
-See [Permissions](https://opencode.ai/docs/permissions/) for details.
+Approvals come back as `once`, `always`, or `reject`. "Always" saves a durable, project-scoped allow rule. It never overrides a `deny`.
+
+See [Permissions](https://opencode.ai/v2/docs/permissions/) for details.
 
 </details>
 
@@ -481,171 +415,163 @@ See [Permissions](https://opencode.ai/docs/permissions/) for details.
 
 <a id="skills"></a>
 
-- **What they are:** Reusable, on-disk instructions OpenCode discovers automatically. Each skill is a folder with a `SKILL.md` (YAML frontmatter + body). The agent loads them on demand via the native `skill` tool.
-- **Where skills live:** OpenCode searches these locations (project paths walk up to the git worktree; global paths are always loaded):
+- **What they are:** Reusable instructions OpenCode discovers on disk. Each skill is a `SKILL.md` file, loaded on demand through the native `skill` tool.
+- **Where skills live:**
   - Project: `.opencode/skills/<name>/SKILL.md`
   - Global: `~/.config/opencode/skills/<name>/SKILL.md`
-  - Claude-compatible: `.claude/skills/<name>/SKILL.md`, `~/.claude/skills/<name>/SKILL.md`
-  - Agent-compatible: `.agents/skills/<name>/SKILL.md`, `~/.agents/skills/<name>/SKILL.md`
-- **File format (YAML frontmatter + body):**
+  - Claude-compatible: `.claude/skills/`, `~/.claude/skills/`
+  - Agent-compatible: `.agents/skills/`, `~/.agents/skills/`
+  - A root-level `skills/<name>.md` works too, and a `SKILL.md` nested in a grouping directory keeps only that one skill
+- **The skill ID comes from the path, not the frontmatter.** `skills/teams/release/SKILL.md` has the ID `release`. `name` is just a display label.
+- **File format:**
   ```markdown
   ---
-  name: your-skill-name          # required, 1-64 chars, lowercase + hyphens only
-  description: when/why to use   # required, 1-1024 chars
-  license: MIT                   # optional
-  compatibility: opencode        # optional
-  metadata:                      # optional, string-to-string map
-    audience: maintainers
-    workflow: github
+  name: Git Release
+  description: Prepare release notes, version bumps, and GitHub releases
   ---
-  
-  # Optional body (loaded on demand)
-  Add references, workflows, or examples here.
+
+  1. Read `references/release-policy.md`.
+  2. Summarize merged changes since the previous tag.
   ```
-- **Using skills:** The agent sees available skills in its `skill` tool description and loads the full content when needed. Reference them from `AGENTS.md` or prompts.
-- **Permissions per skill:** Control access in config with pattern-based rules:
+- **Hiding a skill from the model:**
+  ```markdown
+  ---
+  name: Internal Rollout
+  description: Internal rollout runbook
+  metadata:
+    opencode/autoinvoke: false
+  ---
+  ```
+  The skill stays registered and can still be loaded by ID.
+- **Permissions per skill:**
   ```jsonc
   {
-    "permission": {
-      "skill": {
-        "*": "allow",
-        "internal-*": "deny",
-        "experimental-*": "ask"
-      }
-    }
+    "permissions": [
+      { "action": "skill", "resource": "*", "effect": "allow" },
+      { "action": "skill", "resource": "internal-*", "effect": "deny" },
+      { "action": "skill", "resource": "experimental-*", "effect": "ask" }
+    ]
   }
   ```
-- **Sample skills in this repo:** Copy or symlink any of the samples below into `.opencode/skills/<name>/SKILL.md`, then restart OpenCode:
+- **Extra sources:** add directories or HTTP catalogs with the `skills` array in config.
+- **Sample skills in this repo.** Copy one into `.opencode/skills/<name>/SKILL.md` and restart OpenCode:
   - `skills/mcp-setup/SKILL.md`
   - `skills/session-management/SKILL.md`
   - `skills/plan-mode/SKILL.md`
-- **Troubleshooting:** If a skill doesn't appear — verify `SKILL.md` is all caps, confirm `name` + `description` frontmatter, ensure the name is unique, and check that permissions don't `deny` it.
+- **Troubleshooting:** confirm the file is named exactly `SKILL.md` or is a root-level `.md`, check the path-derived ID, add a `description` so the model can find it, and check that permissions do not deny it.
 
-See [Agent Skills](https://opencode.ai/docs/skills/) for details.
+See [Agent Skills](https://opencode.ai/v2/docs/skills/) for details.
+
+</details>
 
 ## Level 4: Advanced Features
-
-Powerful features for complex workflows.
 
 <details>
 <summary><strong>MCP Integration</strong></summary>
 
-MCP (Model Context Protocol) adds external tools alongside OpenCode's built-ins.
-
 ```bash
-# Add an MCP server (interactive prompt for local/remote)
-opencode mcp add
+# Add a server (local or remote)
+opencode mcp add context7 --url https://mcp.context7.com/mcp
+opencode mcp add everything -- npx -y @modelcontextprotocol/server-everything
+opencode mcp add everything --env LOG_LEVEL=info -- npx -y @modelcontextprotocol/server-everything
+opencode mcp add context7 --global --url https://mcp.context7.com/mcp
 
-# List servers and connection status
-opencode mcp list            # or: opencode mcp ls
-
-# Authenticate an OAuth-enabled server
-opencode mcp auth <name>
-opencode mcp auth list      # auth status for all OAuth-capable servers
-
-# Remove stored OAuth credentials
-opencode mcp logout <name>
-
-# Debug OAuth / connectivity for a server
-opencode mcp debug <name>
+opencode mcp list            # connection status for each server
+opencode mcp auth sentry     # OAuth sign-in
+opencode mcp auth             # pick from the OAuth-capable servers
+opencode mcp logout sentry   # drop stored credentials
 ```
 
-Configure servers in `opencode.json` (local example):
+To remove a server, delete its entry from the config where it was added. There is no `mcp remove` command.
+
+Config shape changed in v2. Servers live under `mcp.servers`, and the flag is `disabled`, not `enabled`:
 
 ```jsonc
 {
   "mcp": {
-    "mcp_everything": {
-      "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-everything"]
+    "servers": {
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp",
+        "headers": { "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}" }
+      },
+      "everything": {
+        "type": "local",
+        "command": ["npx", "-y", "@modelcontextprotocol/server-everything"],
+        "cwd": "."
+      }
     }
   }
 }
 ```
 
-Remote example (with auth headers):
+Remote servers use OAuth by default. Set `"oauth": false` when the server only takes an API key.
 
-```jsonc
-{
-  "mcp": {
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp",
-      "headers": { "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}" }
-    }
-  }
-}
-```
+MCP tools cost context. Keep the list short.
 
-OAuth-enabled remote servers need no special config — OpenCode detects the 401 and
-runs the flow automatically. Disable a server with `"enabled": false`.
-
-> **Tip:** MCP servers add to context. Be selective — a server like GitHub MCP can
-> blow past the context limit fast.
-
-See [MCP Servers](https://opencode.ai/docs/mcp-servers/) for details.
+See [MCP Servers](https://opencode.ai/v2/docs/mcp-servers/) for details.
 
 </details>
 
 <details>
-<summary><strong>Agents & Custom Agents</strong></summary>
+<summary><strong>Custom Agents</strong></summary>
 
-Define specialized agents in `opencode.json` or as markdown in
-`~/.config/opencode/agents/` (or `.opencode/agents/`).
-
-Markdown agent (`.opencode/agents/review.md`):
+Markdown agent at `.opencode/agents/reviewer.md`:
 
 ```markdown
 ---
-description: Reviews code for quality and best practices
+description: Reviews changes for correctness and regressions
 mode: subagent
-permission:
-  edit: deny
-  bash: deny
+model: anthropic/claude-sonnet-5-5#high
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: deny
 ---
-You are in code review mode. Focus on code quality, potential bugs,
-performance, and security. Provide feedback without making changes.
+
+Review the current changes. List findings in severity order with file and line references.
 ```
 
-JSON config:
+JSONC in `opencode.jsonc`:
 
 ```jsonc
 {
-  "agent": {
-    "code-reviewer": {
-      "description": "Reviews code for best practices and potential issues",
+  "$schema": "https://opencode.ai/config.json",
+  "agents": {
+    "reviewer": {
+      "description": "Reviews current changes",
       "mode": "subagent",
-      "model": "anthropic/claude-sonnet-4-5",
-      "prompt": "You are a code reviewer. Focus on security, performance, maintainability.",
-      "permission": { "edit": "deny" }
+      "system": "Report findings in severity order.",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" }
+      ]
     }
-  },
-  "default_agent": "plan"   // optional: change the default primary agent
+  }
 }
 ```
+
+The Markdown body becomes the agent's `system` prompt. Modes are `primary`, `subagent`, and `all`. `steps` caps how many model steps an agent gets.
 
 Manage agents from the CLI:
 
 ```bash
-opencode agent list                       # List all available agents
-opencode agent create                     # Interactive agent creator
-opencode agent create --path .opencode/agents \
-  --description "Docs writer" --mode subagent --permissions "read,bash:deny"
-  # --permissions accepts the alias --tools
+opencode debug agents                          # list all agents
+opencode debug agent build                     # show one agent's resolved config
 ```
 
-Built-in modes: `primary` (interact directly, cycle with Tab), `subagent` (invoke
-via `@` or by the model), `all`. See [Agents](https://opencode.ai/docs/agents/) for details.
+There is no `opencode agent create` in v2. Write the file.
+
+See [Agents](https://opencode.ai/v2/docs/agents/) for details.
 
 </details>
 
 <details>
 <summary><strong>Custom Commands</strong></summary>
 
-Create repeatable prompts as commands. Place markdown in
-`~/.config/opencode/commands/` or `.opencode/commands/`.
-
-`.opencode/commands/component.md`:
+Markdown at `.opencode/commands/component.md`:
 
 ```markdown
 ---
@@ -655,13 +581,9 @@ Create a new React component named $ARGUMENTS with TypeScript support.
 Include proper typing and basic structure.
 ```
 
-Run it in the TUI:
+Run it with `/component Button`. Placeholders: `$ARGUMENTS` for the whole string, `$1`, `$2` for positional arguments.
 
-```bash
-/component Button
-```
-
-Prompts support shell output (`!`command``) and file references (`@file`):
+Shell output and file references work inside a command body:
 
 ```markdown
 ---
@@ -672,192 +594,115 @@ Recent git commits:
 Review these changes and suggest improvements.
 ```
 
-See [Commands](https://opencode.ai/docs/commands/) for details.
+See [Commands](https://opencode.ai/v2/docs/commands/) for details.
 
 </details>
 
 <details>
-<summary><strong>Non-Interactive & Scripting</strong></summary>
+<summary><strong>Non-Interactive and Scripting</strong></summary>
 
 ```bash
-# Run a single prompt and exit
 opencode run "Explain how closures work in JavaScript"
-
-# Attach files to the message
 opencode run -f src/app.ts "review this file"
-
-# Output raw JSON events (for automation)
 opencode run --format json "list the exported functions in main.go"
-
-# Run a CLI command non-interactively (message is used for args)
-opencode run --command "git log" "summarize recent commits"
-
-# Show thinking blocks / set a model variant (reasoning effort)
+opencode run --title "Spike: auth refactor" "plan the work"
 opencode run --thinking "debug this stack trace"
-opencode run --variant high "optimize this query"
 
-# Run in direct interactive split-footer mode
-opencode run -i "walk through the refactor"
-
-# Run in a specific directory (remote path if attaching)
-opencode run --dir src/api "review this directory"
-
-# Spin up a local server with basic auth for the run
-opencode run --port 4097 -u admin -p secret "draft the API spec"
-
-# Continue / fork / share from a run
+# Continue, fork, or share from a run
 opencode run -c "add tests for utils.ts"
 opencode run -s <sessionID> --fork "try a different approach"
-opencode run --share "draft the API spec"
 
-# Pipe content in
+# Pipe input in
 cat error.log | opencode run "find the root cause"
 git diff | opencode run "write a commit message"
-
-# Title the session
-opencode run --title "Spike: auth refactor" "plan the work"
 ```
 
-`opencode run` is the scripting entry point — pair it with `--attach` to a running
-`opencode serve` to skip MCP cold boots. See [CLI](https://opencode.ai/docs/cli/) for details.
+`opencode run` is the scripting entry point. Point it at a running server to skip MCP cold boots on every call.
+
+See [CLI](https://opencode.ai/v2/docs/cli/) for details.
 
 </details>
 
 <details>
-<summary><strong>Server, Web & ACP</strong></summary>
+<summary><strong>Server, Web, and Pairing</strong></summary>
 
 ```bash
-# Headless HTTP server (API access, no TUI)
-opencode serve --port 4096
-
-# Bind to a specific hostname
-opencode serve --hostname 0.0.0.0 --port 4096
-
-# Advertise via mDNS so other devices can discover the server
-opencode serve --mdns                     # defaults hostname to 0.0.0.0
-opencode serve --mdns --mdns-domain dev.local   # custom domain (default: opencode.local)
-
-# Allow browser clients from additional origins
+# Headless server
+opencode serve --port 49374 --hostname 127.0.0.1
 opencode serve --cors https://app.example.com
 
-# Headless server + web interface (opens browser)
-opencode web --port 4096
+# Pair a browser or phone (one-time link, expires in 5 minutes)
+opencode pair
+opencode pair --remote        # exposes the server through OpenTunnel
 
-# Attach a TUI to a running backend (remote access)
-opencode attach http://10.20.30.40:4096
+# Talk to the API directly
+opencode api session.list
+opencode api "GET /api/session/"
 
-# ACP (Agent Client Protocol) server over stdio
+# ACP server for editor integrations
 opencode acp
-
-# Run the GitHub agent (typically in Actions)
-opencode github run
-opencode github run --event push         # Mock event for local testing
-opencode github run --token github_pat_********   # Pass a PAT explicitly
-opencode github install     # Sets up the repo GitHub Actions workflow
 ```
 
-Set `OPENCODE_SERVER_PASSWORD` to require HTTP basic auth on `serve`/`web`.
-Same flags apply to `opencode web` and `opencode acp`; the server config keys are
-`hostname`, `mdns`, `mdnsDomain`, and `cors`.
-See [Server](https://opencode.ai/docs/server/) and [ACP](https://opencode.ai/docs/acp/).
-
-</details>
-
-<details>
-<summary><strong>Sharing & Importing Sessions</strong></summary>
+v2 runs one shared background server per user account. Every local client connects to it, and it owns sessions, config, integrations, permissions, and tool execution.
 
 ```bash
-# In the TUI
-/share                      # Create a share link (copied to clipboard)
-/unshare                    # Remove the share
-
-# From the CLI
-opencode run --share "walk through the bug"
-opencode export <sessionID> --sanitize   # Redact sensitive data
-
-# Import a session from file or share URL
-opencode import session.json
-opencode import https://opncd.ai/s/abc123
+opencode service status
+opencode service restart
+opencode service stop
+opencode service set disabled true    # opt out of the shared service
 ```
 
-Sharing is off by default — you opt in per session. Configure globally:
+`--standalone` gives you a private server for one invocation. `--server <url>` connects to a specific one.
 
-```jsonc
-{ "share": "manual" }   // "manual" | "auto" | "disabled"
-```
-
-See [Share](https://opencode.ai/docs/share/) for details.
+See [API](https://opencode.ai/v2/docs/api/) for details.
 
 </details>
 
 ## Level 5: Expert Workflows
 
-Advanced patterns and automation for power users.
-
 <details>
-<summary><strong>Stats & Cost Tracking</strong></summary>
+<summary><strong>Stats and Cost Tracking</strong></summary>
 
 ```bash
-# Token usage and cost across sessions
 opencode stats
-
-# Last N days
 opencode stats --days 30
-
-# Top models breakdown
-opencode stats --models 5
-
-# Top tools breakdown
-opencode stats --tools 5
-
-# Filter by project
-opencode stats --project /path/to/project
+opencode stats --models         # model usage breakdown
+opencode stats --tools          # tool reliability
+opencode stats --cost           # cost and token details
+opencode stats --project .      # current project only
+opencode stats --json
 ```
-
-Use this to spot expensive models and trim waste.
 
 </details>
 
 <details>
 <summary><strong>Plan-Mode Workflows</strong></summary>
 
-For non-trivial changes, separate thinking from doing:
+For anything non-trivial, separate thinking from doing:
 
-1. Press **Tab** to switch to the **Plan** agent (read-only).
+1. Press **Shift+Tab** to switch to the **Plan** agent.
 2. Describe the feature with context and examples.
-3. Review the proposed plan and iterate.
-4. Press **Tab** back to **Build**, then: "Sounds good, go ahead."
+3. Review the plan and iterate.
+4. Press **Shift+Tab** back to **Build** and say "go ahead".
 
-This keeps OpenCode from editing files until you've signed off — useful for
-refactors, migrations, and anything you'd want a junior dev to plan first.
+This keeps OpenCode from editing files until you approve. Good fit for refactors, migrations, and anything you would want a junior dev to plan first.
 
 </details>
 
 <details>
 <summary><strong>Parallel Subagents</strong></summary>
 
-Offload independent research with subagents:
-
 ```bash
 @general research the rate-limit behavior of the Stripe SDK
 @explore find every place we call the legacy auth module
-@scout check how Next.js 15 handles caching vs our current setup
 ```
 
-Primary agents can also launch subagents automatically. Control nesting depth:
-
-```jsonc
-{ "subagent_depth": 2 }   // 1 = default (one level); 0 = disable subagents
-```
-
-Control which subagents an agent may invoke:
+Control nesting depth with `experimental.subagent_depth` (default `1`, meaning a subagent cannot start another).
 
 ```jsonc
 {
-  "agent": {
-    "orchestrator": {
-      "permission": { "task": { "*": "deny", "code-reviewer": "ask" } }
-    }
+  "experimental": {
+    "subagent_depth": 2
   }
 }
 ```
@@ -865,247 +710,232 @@ Control which subagents an agent may invoke:
 </details>
 
 <details>
-<summary><strong>Plugins & Ecosystem</strong></summary>
+<summary><strong>Plugins</strong></summary>
 
 ```bash
-# Install a plugin (updates config automatically)
-opencode plugin opencode-helicone-session
-opencode plug @my-org/custom-plugin          # alias: plug
-
-# Install globally
-opencode plugin -g some-plugin
-
-# Force replace an existing version
-opencode plugin -f some-plugin
+opencode plugin add opencode-helicone-session
+opencode plugin list
+opencode plugin check              # look for updates
+opencode plugin update
+opencode plugin remove <package>
 ```
 
-Plugins live in `.opencode/plugins/` or `~/.config/opencode/plugins/`, or load from
-npm via the `plugin` config key. See [Plugins](https://opencode.ai/docs/plugins/).
+Or load them from config:
+
+```jsonc
+{
+  "plugins": [
+    "opencode-example-plugin",
+    { "package": "./plugins/local", "options": { "enabled": true } }
+  ]
+}
+```
+
+v1 plugin implementations do not run in v2. The plugin API changed.
 
 </details>
 
 <details>
-<summary><strong>Debugging & Troubleshooting</strong></summary>
+<summary><strong>Worktrees</strong></summary>
 
 ```bash
-# Inspect the fully resolved config (incl. managed settings)
-opencode debug config
-
-# Other debug tooling: lsp, rg, file, scrap, skill, snapshot, startup,
-# agent <name>, v2, info, paths, wait
-opencode debug
-
-# Database tools
-opencode db path            # Print the database path
-opencode db <query>         # Run a query (--format json|tsv)
-
-# Uninstall OpenCode
-opencode uninstall --keep-config   # keep config files
-opencode uninstall --keep-data     # keep session data and snapshots
-opencode uninstall --dry-run       # preview what gets removed
-opencode uninstall -f              # skip confirmation prompts
+# From the TUI
+/worktrees
 ```
 
-When a remote MCP server fails to authenticate, `opencode mcp debug <name>` shows
-auth status and tests the OAuth discovery flow. See
-[Troubleshooting](https://opencode.ai/docs/troubleshooting/).
+Set where new worktrees land:
+
+```jsonc
+{
+  "worktree": {
+    "directory": "../worktrees"
+  }
+}
+```
 
 </details>
 
 <details>
-<summary><strong>Upgrading</strong></summary>
+<summary><strong>Debugging and Troubleshooting</strong></summary>
 
 ```bash
-# Upgrade to the latest version
-opencode upgrade
+opencode debug config               # resolved configuration
+opencode debug agents               # every agent
+opencode debug paths                # data, config, cache, state
+opencode debug paths db             # just the database path
+opencode debug heap-dump            # write a heap snapshot
 
-# Upgrade to a specific version
-opencode upgrade v0.1.48
-
-# Force a specific install method (curl, npm, pnpm, bun, brew, choco, scoop)
-opencode upgrade -m brew
-
-# Disable autoupdate checks
-export OPENCODE_DISABLE_AUTOUPDATE=1
+# Shell completions
+opencode --completions zsh
 ```
 
-To keep autoupdate on but only notify: `"autoupdate": "notify"` in config (only
-when not installed via a package manager).
+</details>
+
+<details>
+<summary><strong>Upgrading and Uninstalling</strong></summary>
+
+```bash
+opencode upgrade                   # latest version
+opencode upgrade v2.1.4            # a specific version
+opencode upgrade --method brew     # force an install method
+
+opencode uninstall --dry-run        # preview
+opencode uninstall --force          # skip the confirmation
+```
+
+Uninstalling keeps session data, configuration, and state.
 
 </details>
 
 ## Command Reference
 
-### Global CLI Commands
+### CLI Commands
 
 | Command | Description |
-|---------|-------------|
-| `opencode` | Start the TUI in the current directory (or `[project]`) |
+|---|---|
+| `opencode` | Start the TUI (or in a given directory) |
 | `opencode run [msg]` | Run a prompt non-interactively |
-| `opencode completion` | Generate shell completion script |
-| `opencode providers` | Manage AI providers and credentials (`login`, `list`/`ls`, `logout`; alias: `auth`) |
-| `opencode models [provider]` | List available models |
-| `opencode mcp` | Manage MCP servers (`add`, `list`/`ls`, `auth`, `logout`, `debug`) |
-| `opencode agent` | Manage agents (`create`, `list`) |
-| `opencode session` | Manage sessions (`list`, `delete <id>`) |
-| `opencode github` | Manage the GitHub agent (`install`, `run`) |
-| `opencode serve` | Start a headless HTTP server |
-| `opencode web` | Start a headless server with web UI |
-| `opencode attach [url]` | Attach a TUI to a running backend |
-| `opencode acp` | Start an ACP server (stdio) |
-| `opencode plugin <module>` | Install a plugin (`plug` alias) |
-| `opencode pr <number>` | Checkout a GitHub PR branch, then run OpenCode |
-| `opencode export [id]` | Export a session as JSON |
-| `opencode import <file\|url>` | Import a session from file or share URL |
-| `opencode stats` | Token usage and cost statistics |
-| `opencode db [query]` | Database tools |
-| `opencode debug` | Debugging and troubleshooting tools |
-| `opencode upgrade [target]` | Upgrade OpenCode |
-| `opencode uninstall` | Uninstall OpenCode |
+| `opencode mini` | Start the minimal interactive interface |
+| `opencode serve` | Start the v2 API and web server |
+| `opencode session` | Manage sessions (`list`, `delete`, `export`, `import`) |
+| `opencode models` | List available models |
+| `opencode auth` | Manage credentials (`login`, `list`, `logout`, `export`, `import`, `switch`) |
+| `opencode mcp` | Manage MCP servers (`add`, `list`, `auth`, `logout`) |
+| `opencode plugin` | Manage plugins (`list`, `add`, `check`, `update`, `remove`) |
+| `opencode stats` | Usage and cost statistics |
+| `opencode api` | Call the running server |
+| `opencode pair` | Print a one-time pairing link |
+| `opencode service` | Manage the background server (`start`, `restart`, `status`, `stop`, `get`, `set`, `unset`) |
+| `opencode reload` | Reload configuration |
+| `opencode acp` | Start an ACP server over stdio |
+| `opencode debug` | Debugging tools (`agents`, `config`, `paths`, `heap-dump`) |
+| `opencode upgrade` | Upgrade OpenCode |
+| `opencode uninstall` | Uninstall OpenCode, keeping session data, config, and state |
 
-### Common Global Flags
+### Global Flags
 
 | Flag | Description |
-|------|-------------|
+|---|---|
 | `-m, --model` | Model in `provider/model` format |
 | `-c, --continue` | Continue the last session |
 | `-s, --session` | Session ID to continue |
 | `--fork` | Fork the session when continuing |
 | `--prompt` | Prompt to use |
 | `--agent` | Agent to use |
-| `--auto` | Auto-approve non-denied permissions (dangerous) |
-| `--mini` | Start the minimal interactive interface |
-| `--no-replay` | Disable mini session history replay on resume and after resize |
-| `--replay-limit` | Cap visible mini replay to the newest N messages |
-| `--pure` | Run without external plugins |
-| `-v, --version` | Print version number |
+| `--auto` | Auto-approve permissions that are not explicitly denied |
+| `--standalone` | Run a private server instead of the shared service |
+| `--server` | Connect to a specific server URL |
+| `--completions` | Print a shell completion script (`bash`, `zsh`, `fish`, `sh`) |
+| `--log-level` | Minimum log level |
+| `--print-logs` | Print logs to stderr |
+| `-v, --version` | Print the version |
 | `-h, --help` | Show help |
-
-### TUI Keybinds (leader: ctrl+x)
-
-| Keybind | Action |
-|---------|--------|
-| `ctrl+x n` | New session (`/new`, `/clear`) |
-| `ctrl+x l` | List/switch sessions (`/sessions`) |
-| `ctrl+x u` | Undo last message (`/undo`) |
-| `ctrl+x r` | Redo undone message (`/redo`) |
-| `ctrl+x c` | Compact session (`/compact`) |
-| `ctrl+x e` | External editor (`/editor`) |
-| `ctrl+x x` | Export to Markdown (`/export`) |
-| `ctrl+x m` | List models (`/models`) |
-| `ctrl+x t` | List themes (`/themes`) |
-| `ctrl+x q` | Quit (`/exit`) |
-| `Tab` | Cycle primary agents (Build / Plan) |
-| `ctrl+t` | Cycle model variants (reasoning effort) |
 
 ### Built-in Agents
 
 | Agent | Mode | Use it for |
-|-------|------|------------|
-| `build` | primary | Default — full tool access for implementation |
+|---|---|---|
+| `build` | primary | Default. Full tool access for implementation |
 | `plan` | primary | Read-only analysis and planning |
-| `general` | subagent | Multi-step work; can change files; runs in parallel |
-| `explore` | subagent | Fast, read-only codebase exploration |
-| `scout` | subagent | Read-only external docs / dependency research |
+| `general` | subagent | Multi-step work with broad tool access |
+| `explore` | subagent | Read-only codebase and web research |
+
+`compaction`, `title`, and `summary` also exist but are hidden and cannot be selected.
+
+## Migrating from v1
+
+Three breaking changes matter:
+
+1. **Plugins use a new plugin API.** v1 plugin implementations do not run in v2.
+2. **The server API and client contracts changed.** Use `@opencode/client` and regenerate any integration you wrote.
+3. **Terminal config is one global `cli.json`.** The layered `tui.json(c)` setup is replaced, and v1's global `tui.json` is migrated automatically.
+
+v1 config syntax is still read and normalized in memory, so old files keep working. These are the field renames worth knowing:
+
+| v1 | v2 |
+|---|---|
+| `permission` (object) | `permissions` (ordered array) |
+| `bash` action | `shell` |
+| `task` action | `subagent` |
+| `write` / `patch` action | `edit` |
+| `agent` (singular) | `agents` |
+| `prompt` | `system` |
+| `disable` | `disabled` |
+| `maxSteps` | `steps` |
+| `mcp.<name>` | `mcp.servers.<name>` |
+| MCP `enabled` | MCP `disabled` |
+| `compaction.preserve_recent_tokens` | `compaction.keep.tokens` |
+| `subagent_depth` | `experimental.subagent_depth` |
+| `provider` (singular) | `providers` |
+| `command` | `commands` |
+| `reference` | `references` |
+
+Two more things to know: v2 has no LSP tools, and it does not discover `CLAUDE.md`. Only `AGENTS.md`.
 
 ## Best Practices
 
 ### Think Critically
 
-OpenCode is an assistant, not a replacement for your judgment:
-
-- **Review changes** before accepting — understand what changed and why (use `/undo` to roll back)
-- **Use Plan mode** for non-trivial work — get a proposal, then approve
-- **Ask with context** — reference files with `@`, give examples, talk to it like a teammate
-- **Question assumptions** — if something feels off, dig deeper
+- Read the diff before accepting it, and use `/undo` to roll back
+- Use Plan mode for non-trivial work: get a proposal, then approve
+- Reference files with `@` and give examples, like you would to a teammate
+- Push back when something looks off
 
 ### Stay Secure
 
-- Never commit API keys — they live in `~/.local/share/opencode/auth.json`, not your repo
-- Tighten permissions with `"ask"`/`"deny"` for `edit` and `bash` in shared/unknown codebases
-- Be selective with MCP servers — they add to context and can exceed limits
-- Use `export --sanitize` before sharing sessions that contain secrets
+- Never commit API keys. They live in `~/.local/share/opencode/auth.json`
+- Add `external_directory` rules if you work outside the project root
+- Be selective with MCP servers; they eat context
+- Use `session export --sanitize` before sharing a transcript
 
 ### Work Effectively
 
-- Run `/init` and commit `AGENTS.md` for project context
-- Create skills for repetitive, domain-specific workflows
-- Use sessions for multi-turn problems; `--fork` to explore safely
-- Combine OpenCode with traditional tools (`git`, `grep`, your editor)
-- Leverage subagents (`@general`, `@explore`, `@scout`) for parallel research
-
-### Continuous Learning
-
-- Run `opencode models --refresh` when a provider adds new models
-- Use `/thinking` to see the model's reasoning on hard problems
-- Build your own agents and commands for team patterns
-- Check `opencode stats` to understand cost and model usage
+- Commit an `AGENTS.md` so every session starts with the same context
+- Package repeated workflows as skills
+- Use sessions for multi-turn problems, `--fork` to explore safely
+- Combine OpenCode with your usual tools: `git`, `rg`, your editor
 
 ## Additional Resources
 
-**Official OpenCode Documentation:**
-- [OpenCode](https://opencode.ai/) — Home, install, and overview
-- [Docs](https://opencode.ai/docs) — Full documentation hub
-- [Intro / Getting Started](https://opencode.ai/docs/) — Install, configure, initialize
-- [CLI Reference](https://opencode.ai/docs/cli/) — Every subcommand and flag
-- [TUI Reference](https://opencode.ai/docs/tui/) — Slash commands and keybinds
-- [Config Reference](https://opencode.ai/docs/config/) — `opencode.json` schema
-- [Agents](https://opencode.ai/docs/agents/) — Built-in and custom agents
-- [Agent Skills](https://opencode.ai/docs/skills/) — Reusable SKILL.md capabilities
-- [IDE](https://opencode.ai/docs/ide/) — Desktop app and IDE extension
-- [Web](https://opencode.ai/docs/web/) — Web interface
-- [Go](https://opencode.ai/docs/go/) — Go SDK
-- [Commands](https://opencode.ai/docs/commands/) — Custom commands
-- [MCP Servers](https://opencode.ai/docs/mcp-servers/) — External tool integration
-- [Permissions](https://opencode.ai/docs/permissions/) — Approval policies
-- [Policies](https://opencode.ai/docs/policies/) — Allow/deny actions on configured resources
-- [Rules](https://opencode.ai/docs/rules/) — AGENTS.md and instruction files
-- [Models](https://opencode.ai/docs/models/) — Model configuration and local models
-- [Themes](https://opencode.ai/docs/themes/) — UI themes
-- [Keybinds](https://opencode.ai/docs/keybinds/) — Keyboard shortcuts
-- [Formatters](https://opencode.ai/docs/formatters/) — Code formatting
-- [LSP Servers](https://opencode.ai/docs/lsp/) — Language server integration
-- [Custom Tools](https://opencode.ai/docs/custom-tools/) — Custom tool definitions
-- [References](https://opencode.ai/docs/references/) — File references
-- [SDK](https://opencode.ai/docs/sdk/) — Build on OpenCode
-- [Network](https://opencode.ai/docs/network/) — Network configuration
-- [Enterprise](https://opencode.ai/docs/enterprise/) — Enterprise setup
-- [GitHub Agent](https://opencode.ai/docs/github/) — Repo automation
-- [GitLab Agent](https://opencode.ai/docs/gitlab/) — GitLab integration
-- [Share](https://opencode.ai/docs/share/) — Session sharing
-- [Troubleshooting](https://opencode.ai/docs/troubleshooting/)
+**Official documentation:**
+- [OpenCode](https://opencode.ai/) - Home and install
+- [v2 docs](https://opencode.ai/v2/docs/) - Documentation hub
+- [CLI](https://opencode.ai/v2/docs/cli/) - Every subcommand and flag
+- [TUI](https://opencode.ai/v2/docs/cli/tui/) - Interface and slash commands
+- [Config](https://opencode.ai/v2/docs/config/) - Configuration reference
+- [Agents](https://opencode.ai/v2/docs/agents/) - Built-in and custom agents
+- [Skills](https://opencode.ai/v2/docs/skills/) - Reusable SKILL.md capabilities
+- [Commands](https://opencode.ai/v2/docs/commands/) - Custom commands
+- [MCP servers](https://opencode.ai/v2/docs/mcp-servers/) - External tools
+- [Permissions](https://opencode.ai/v2/docs/permissions/) - Approval rules
+- [Policies](https://opencode.ai/v2/docs/policies/) - Allow or deny actions
+- [Server](https://opencode.ai/v2/docs/server/) - HTTP API
+- [Plugins](https://opencode.ai/v2/docs/plugins/) - Plugin API
+- [Migrating from v1](https://opencode.ai/v2/docs/migrate-v1/) - Full change list
+- [Troubleshooting](https://opencode.ai/v2/docs/troubleshooting/)
 
-**Repository & Community:**
-- [GitHub: anomalyco/opencode](https://github.com/anomalyco/opencode) — Source and issues
-- [Discord](https://opencode.ai/discord) — Community Q&A
-- [Zen](https://opencode.ai/zen/) — Curated, benchmarked models for coding agents
+**Repository and community:**
+- [GitHub: anomalyco/opencode](https://github.com/anomalyco/opencode) - Source and issues
+- [Discord](https://opencode.ai/discord) - Community Q&A
 
-**Related Tools:**
-- [Codex Cheat Sheet](https://github.com/BA-CalderonMorales/codex-cheat-sheet) — Companion guide for OpenAI Codex CLI
-- [Kimi Cheat Sheet](https://github.com/BA-CalderonMorales/kimi-cheat-sheet) — Companion guide for Kimi Code CLI
-
-> **Tip**: Always check the [official OpenCode documentation](https://opencode.ai/docs) for the latest features and updates. This cheat sheet is a quick reference, but the official docs contain the most comprehensive and up-to-date information.
+**Related tools:**
+- [Codex Cheat Sheet](https://github.com/BA-CalderonMorales/codex-cheat-sheet) - Companion guide for OpenAI Codex CLI
+- [Kimi Cheat Sheet](https://github.com/BA-CalderonMorales/kimi-cheat-sheet) - Companion guide for Kimi Code CLI
 
 ## Contributing
 
-Found an issue, or notice something is off? Contributions are welcome — this is a Beta sheet, so corrections matter.
+Corrections are welcome. Report anything that no longer matches `opencode --help`.
 
 - Report bugs or inconsistencies
 - Suggest new examples
-- Share your workflows
 - Improve documentation
+- Share your workflows
 
 ## License
 
-MIT License — Free to use and modify.
+MIT License. Free to use and modify.
 
 ---
 
-**Last updated: September 2026**
-**Based on**: OpenCode CLI (npm: opencode-ai, v1.18.27)
-
-*This is a Beta reference. Commands and examples are verified against `opencode --help` and the official docs, but OpenCode evolves quickly — flag anything that drifts.*
-
-*Last synced: 2026-09-03 via [workspace manager](https://github.com/BA-CalderonMorales)*
-
----
+**Last updated: October 2026**
+**Based on**: OpenCode CLI (npm: `@opencode/cli`, v2.1.4)
