@@ -909,7 +909,7 @@ Two more things to know: v2 has no LSP tools, and it does not discover `CLAUDE.m
 - [MCP servers](https://opencode.ai/v2/docs/mcp-servers/) - External tools
 - [Permissions](https://opencode.ai/v2/docs/permissions/) - Approval rules
 - [Policies](https://opencode.ai/v2/docs/policies/) - Allow or deny actions
-- [Server](https://opencode.ai/v2/docs/server/) - HTTP API
+- [API](https://opencode.ai/v2/docs/api/) - HTTP API reference
 - [Plugins](https://opencode.ai/v2/docs/plugins/) - Plugin API
 - [Migrating from v1](https://opencode.ai/v2/docs/migrate-v1/) - Full change list
 - [Troubleshooting](https://opencode.ai/v2/docs/troubleshooting/)
